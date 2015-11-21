@@ -1,0 +1,2 @@
+# eDjango
+An extended Django
