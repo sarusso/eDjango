@@ -3,6 +3,14 @@ from edjango.common.utils import booleanize
 from edjango.common.utils import discover_apps
 import os
 
+
+# Try to understand where we are
+if not os.path.isfile('manage.py'):
+    if os.path.isfile('../../manage.py'):
+        os.chdir('../../')
+    else:
+        abort('Sorry, could not find fabfile. Are you in the root directory or in an app directory?')
+
 #--------------------
 # Utility functions
 #--------------------
