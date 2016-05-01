@@ -43,3 +43,4 @@ pip-delete-this-directory.txt
 
 /edjango/*app
 !/edjango/base_app
+*.sqlite3
