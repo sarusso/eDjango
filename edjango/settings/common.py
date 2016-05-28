@@ -59,7 +59,7 @@ ROOT_URLCONF = 'edjango.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Django will look for a 'templates' dir in evry app and render properly
+        # Django will look for a 'templates' dir in every app and render properly
         'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'edjango.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 default_db_engine = 'django.db.backends.sqlite3'
-default_db_name   = os.path.join(BASE_DIR, '../edjango.sqlite3')
+default_db_name   = os.path.join(BASE_DIR, '../db-edjango.sqlite3')
 if not os.environ.get('DJANGO_DB_NAME'):
     print '\nSETTINGS WARNING: I will use the default DB! -> {}\n'.format(default_db_name)
 
@@ -112,7 +112,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
@@ -120,23 +119,71 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# ------------------------------
+#    Logging
+# ------------------------------
+
+DJANGO_LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL','ERROR')
+EDJANGO_LOG_LEVEL = os.environ.get('EDJANGO_LOG_LEVEL','ERROR')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+ 
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d '
+                      '%(thread)d %(message)s',
+        },
+        'halfverbose': {
+            'format': '%(asctime)s, %(name)s: [%(levelname)s] - %(message)s',
+            'datefmt': '%m/%d/%Y %I:%M:%S %p'
+        }
+    },
+ 
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+ 
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'halfverbose',
+        },
+    },
+ 
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'], #['mail_admins'],
+            'level': DJANGO_LOG_LEVEL,
+            'propagate': True,
+        },
+        'edjango': {
+            'handlers': ['console'], #['mail_admins'],
+            'level': EDJANGO_LOG_LEVEL,
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console'], #['mail_admins'],
+            'level': DJANGO_LOG_LEVEL,
+            'propagate': True,
+        }, 
+    }
+}
+
+
 
 # ####################################################################
 # From old environment.py
 # ####################################################################
-
-
-# Debug flags
-DEBUG = True
-
-
-#----------------------------------------
-#     Database
-#----------------------------------------
-
-
-
-
 
 # ----------------------------------------
 #    Static/Media files
@@ -154,23 +201,8 @@ DEBUG = True
 #     STATIC_PATH,
 # )
 
-
-
-
 #if not booleanize(os.environ.get('REST_DEBUG', False)):
 #REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ('rest_framework.renderers.JSONRenderer',)
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ####################################################################
 # Old common.py
@@ -303,56 +335,6 @@ DEBUG = True
 # 
 # CORS_ALLOW_CREDENTIALS = True
 # 
-# # ------------------------------
-# #    Logging
-# # ------------------------------
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-# 
-#     'formatters': {
-#         'verbose': {
-#             'format': '%(levelname)s %(asctime)s %(module)s %(process)d '
-#                       '%(thread)d %(message)s',
-#         },
-#         'halfverbose': {
-#             'format': '%(asctime)s, %(name)s: [%(levelname)s] - %(message)s',
-#             'datefmt': '%m/%d/%Y %I:%M:%S %p',
-#         }
-#     },
-# 
-#     'filters': {
-#         'require_debug_false': {
-#             '()': 'django.utils.log.RequireDebugFalse'
-#         }
-#     },
-# 
-#     'handlers': {
-#         'mail_admins': {
-#             'level': 'ERROR',
-#             'filters': ['require_debug_false'],
-#             'class': 'django.utils.log.AdminEmailHandler'
-#         },
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'halfverbose',
-#         },
-#     },
-# 
-#     'loggers': {
-#         'django.request': {
-#             'handlers': ['console'], #['mail_admins'],
-#             'level': 'ERROR',
-#             'propagate': True,
-#         },
-#         'edjango': {
-#             'handlers': ['console'], #['mail_admins'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-# 
-#     }
-# }
+
 
 
