@@ -38,9 +38,12 @@ def runserver():
 #-----------------------------
 
 @task
-def install(what=None, env="local"):
+def install(what=None, env="local", noinput=False):
     run("python manage.py makemigrations")
-    run("python manage.py migrate")
+    if noinput:
+        run("python manage.py migrate --noinput")
+    else:
+        run("python manage.py migrate")
 
 
 #-----------------------------
