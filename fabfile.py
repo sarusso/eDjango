@@ -29,8 +29,13 @@ def shell():
 
 
 @task
-def runserver():
-    run('python manage.py runserver 0.0.0.0:8080')
+def runserver(noreload=False):
+    if isinstance(noreload,str) and noreload.upper()=='FALSE':
+        noreload=False
+    if noreload:
+        run('python manage.py runserver 0.0.0.0:8080 --noreload')
+    else:
+        run('python manage.py runserver 0.0.0.0:8080')
 
 
 #-----------------------------
