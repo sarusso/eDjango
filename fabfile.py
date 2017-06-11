@@ -54,7 +54,6 @@ def install(what=None, env="local", noinput=False):
 #-----------------------------
 #   Populate
 #-----------------------------
-
 @task
 def populate(env="local"):
     
@@ -68,6 +67,15 @@ def populate(env="local"):
         else:
             print 'No poulate found for {}... ({})'.format(app,populate_file)
 
+
+#-----------------------------
+#   Custom management
+#-----------------------------
+@task
+def management(app=None, command=None, env="local"):
+    if not app or not command:
+        raise Exception('app and command are required!')
+    run("python manage.py {}_{}".format(app,command))
 
 #-----------------------------
 #   Migrations
