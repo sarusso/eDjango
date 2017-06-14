@@ -1,8 +1,8 @@
 # eDjango
 
-An extended Django, for avoing to write the same stuff over oand over again.
+An extended Django, for avoing to write the same stuff over oand over again. Makes strong use of fabric for automating tasks.
 
-Uses Django version 1.8.4.
+By default uses Django version 1.8.4 but should work up to the latest official version - just change it in the requirements.
 
 
 Usage:
