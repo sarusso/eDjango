@@ -172,7 +172,7 @@ def logout_view(request, redirect):
     return HttpResponseRedirect(redirect)
 
 
-def register_view(request, invitation_code):
+def register_view(request, invitation_code, redirect):
 
     # user var
     user = None
@@ -189,7 +189,7 @@ def register_view(request, invitation_code):
     invitation = request.POST.get('invitation', None) # Verification code set for anyone
 
     if request.user.is_authenticated():
-        return (user, HttpResponseRedirect('/'))
+        return (user, HttpResponseRedirect(redirect))
 
     else:
 
