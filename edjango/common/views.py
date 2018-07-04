@@ -13,7 +13,7 @@ import socket
 import os
 
 from edjango.base_app.models import LoginToken
-from edjango.common.utils import send_email, format_exception, log_user_activity
+from edjango.common.utils import send_email, format_exception, log_user_activity, random_username
 
 from edjango.settings import EDJANGO_PROJECT_NAME, EDJANGO_PUBLIC_HTTP_HOST 
 
@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 from edjango.common.exceptions import ErrorMessage
 
+# This is a support array used to prevent double click problems
+ONGOING_SIGNUPS = {}
 
 #=========================
 #  Decorators
@@ -143,10 +145,10 @@ def login_view(request, template, redirect):
             if len(loginTokens) > 1:
                 raise Exception('Consistency error: more than one user with the same login token ({})'.format(len(loginTokens)))
             
-            # Use the first and only profile (todo: use the objects.get and correctly handle its exceptions)
+            # Use the first and only token (todo: use the objects.get and correctly handle its exceptions)
             loginToken = loginTokens[0]
             
-            # Get the user from the profile
+            # Get the user from the table
             user = loginToken.user
             
             # Set auth backend
@@ -169,6 +171,111 @@ def logout_view(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
 
+
+def register_view(request, invitation_code):
+
+    # user var
+    user = None
+
+    # Init data
+    data={}
+    data['user']   = request.user
+    data['title'] = "Register"
+    data['status'] = None
+
+    # Get data
+    email      = request.POST.get('email', None)
+    password   = request.POST.get('password', None)
+    invitation = request.POST.get('invitation', None) # Verification code set for anyone
+
+    if request.user.is_authenticated():
+        return (user, HttpResponseRedirect('/'))
+
+    else:
+
+        if email and password:
+            
+            # Check both email and password are set
+            if not email:
+                data['error'] = 'Missing email'
+                return (user, render(request, 'error.html', {'data': data}))
+         
+            if not password:
+                data['error'] = 'Missing password'
+                return (user, render(request, 'error.html', {'data': data}))
+         
+            # Check if we have to validate an invitation code
+            if invitation_code:
+                if invitation != invitation_code:
+                    data['status'] = 'wrong_invite'
+                    return (user, render(request, 'register.html', {'data': data}))
+
+            
+            if not email in ONGOING_SIGNUPS:
+                
+                # Add user to recent signups dict
+                ONGOING_SIGNUPS[email] = None
+                
+                # Check if user with this email already exists
+                if len(User.objects.filter(email = email)) > 0:
+                    data['error'] = 'The email address you entered is already registered.'
+                    return (user, render(request, 'error.html', {'data': data}))
+                
+                # Register the user
+                username = random_username(email) # It is actually a random string
+                try:
+                    user = User.objects.create_user(username, password=password, email=email)
+                except Exception as e:
+                    logger.error('Got exception when creating the user: {}'.format(format_exception(e)))
+                    data['error'] = 'Error in creating the user. Please try again and if the error persists contact us at info@symplitica.com'
+                    del ONGOING_SIGNUPS[email]
+                    return (user, render(request, 'error.html', {'data': data}))
+
+                # Is this necessary?
+                user.save() 
+                
+                # Manually set the auth backend for the user
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, user)
+                
+                data['status'] = 'activated'
+                data['user'] = user
+                
+                # Remove user from recent signups
+                del ONGOING_SIGNUPS[email]
+                
+                return (user, render(request, 'register.html', {'data': data}))
+            
+            else:
+
+                # Check previous requesta ctivated the user
+                i=0
+                while True:
+                    if email not in ONGOING_SIGNUPS:
+                        break
+                    else:
+                        time.sleep(1)
+                        i+=1
+                    if i>30:
+                        data['error'] = 'Timed up. Your user might have been correctly created anyway. Please try to login if it does not work to signup again, if the error persists contact us at info@symplitica.com'
+                        return (user, render(request, 'error.html', {'data': data}))
+
+                users_with_this_email = User.objects.filter(email = email)
+                if users_with_this_email<1:
+                    data['error'] = 'Error in creating the user. Please try again and if the error persists contact us at info@symplitica.com'
+                    return (user, render(request, 'error.html', {'data': data}))
+                else:
+                    data['status'] = 'activated'
+                    data['user'] = users_with_this_email[0]
+                    user = authenticate(username=users_with_this_email[0].username, password=password)
+                    if not user:
+                        data['error'] = 'Error. Please try again and if the error persists contact us at info@symplitica.com'
+                        return (user, render(request, 'error.html', {'data': data}))
+                    login(request, user)
+                    return (user, render(request, 'register.html', {'data': data}))   
+
+        else:
+            return (user, render(request, 'register.html', {'data': data}))
 
 
 

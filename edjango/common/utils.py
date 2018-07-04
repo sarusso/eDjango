@@ -1,6 +1,8 @@
 
 import os
 import traceback
+import hashlib
+import random
 
 # Setup logging
 import logging
@@ -109,6 +111,18 @@ def log_user_activity(level, msg, request):
 
 
 
+def username_hash(email):
+    '''Create md5 base 64 (25 chrars) hash from user email:'''             
+    m = hashlib.md5()
+    m.update(email)
+    username = m.hexdigest().decode('hex').encode('base64')[:-3]
+    return username
+
+
+def random_username(email):
+    '''Create a random string of 156 chars to be used as username'''             
+    username = ''.join(random.choice('abcdefghilmnopqrtuvz') for _ in range(16))
+    return username
 
 
 
