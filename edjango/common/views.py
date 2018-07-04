@@ -13,13 +13,63 @@ import socket
 import os
 
 from edjango.base_app.models import LoginToken
-from edjango.common.utils import send_email
+from edjango.common.utils import send_email, format_exception, log_user_activity
 
 from edjango.settings import EDJANGO_PROJECT_NAME, EDJANGO_PUBLIC_HTTP_HOST 
 
 # Setup logging
 import logging
 logger = logging.getLogger(__name__)
+
+from edjango.common.exceptions import ErrorMessage
+
+
+#=========================
+#  Decorators
+#=========================
+
+def private_view(func):
+    def func_wrapper(request):
+        if request.user.is_authenticated():
+            log_user_activity("DEBUG", "Called", request)
+            try:
+                return func(request)
+            except Exception as e:
+                if isinstance(e, ErrorMessage):
+                    error_text = str(e)
+                else:
+                    error_text = 'something went wrong'
+                    logger.error(format_exception(e))
+                data = {'user': request.user,
+                        'title': 'Error',
+                        'error' : 'Error: "{}"'.format(error_text)}
+            return render(request, 'error.html', {'data': data})
+        
+        else:
+            log_user_activity("DEBUG", "Redirecting to login since not authenticated", request)
+            return HttpResponseRedirect('/login')               
+    return func_wrapper
+
+def public_view(func):
+    def func_wrapper(request):
+        log_user_activity("DEBUG", "Called", request)
+        try:
+            return func(request)
+        except Exception as e:
+            if isinstance(e, ErrorMessage):
+                error_text = str(e)
+            else:
+                error_text = 'something went wrong'
+                logger.error(format_exception(e))
+            data = {'user': request.user,
+                    'title': 'Error',
+                    'error' : 'Error: "{}"'.format(error_text)}
+        return render(request, 'error.html', {'data': data})           
+    return func_wrapper
+
+
+
+
 
 def login_view(request, template, redirect):
     
@@ -87,8 +137,7 @@ def login_view(request, template, redirect):
             loginTokens = LoginToken.objects.filter(token=token)
             
             if not loginTokens:
-                raise Exception('Token not valid or expired')
-                #raise ErrorMessage('Token not valid or expired')
+                raise ErrorMessage('Token not valid or expired')
     
             
             if len(loginTokens) > 1:
@@ -119,3 +168,9 @@ def login_view(request, template, redirect):
 def logout_view(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
+
+
+
+
+
+
