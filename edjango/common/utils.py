@@ -46,11 +46,29 @@ def discover_apps(folder, only_names=False):
     
     return apps
 
+#=================
+#  Send email
+#=================
 
+EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'info@edjango.project')
+EDJANGO_EMAIL_APIKEY = os.environ.get('EDJANGO_EMAIL_APIKEY', None)
 
+def send_email(to, subject, text):
 
+    import sendgrid
+    from sendgrid.helpers.mail import *
 
-
+    sg = sendgrid.SendGridAPIClient(apikey=EDJANGO_EMAIL_APIKEY)
+    from_email = Email(EDJANGO_EMAIL_FROM)
+    to_email = Email(to)
+    subject = subject
+    content = Content('text/plain', text)
+    mail = Mail(from_email, subject, to_email, content)
+    response = sg.client.mail.send.post(request_body=mail.get())
+    #logger.debug(response.status_code)
+    #logger.debug(response.body)
+    #logger.debug(response.headers)
+    
 
 
 
