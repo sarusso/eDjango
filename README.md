@@ -45,6 +45,7 @@ You can configure things like project name, databse parameters, log levels and e
 	# Logging
 	DJANGO_LOG_LEVEL=ERROR
 	EDJANGO_LOG_LEVEL=ERROR
+	EDJANGO_HARD_DEBUG=False
 	
 
 	
