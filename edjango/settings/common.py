@@ -24,7 +24,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '#k%566hw@w%1((_&=640_4w#p)piwt$m4%#(9x^+it5(h1b6zy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+from edjango.common.utils import booleanize
+DEBUG = booleanize(os.environ.get('DJANGO_DEBUG', False))
 
 ALLOWED_HOSTS = ['*']
 
@@ -124,7 +125,8 @@ STATIC_URL = '/static/'
 
 EDJANGO_PROJECT_NAME = os.environ.get('EDJANGO_PROJECT_NAME', 'eDjango Project')
 EDJANGO_PUBLIC_HTTP_HOST = os.environ.get('EDJANGO_PUBLIC_HTTP_HOST', 'http://localhost:8080')
-
+EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'info@edjango.project')
+EDJANGO_EMAIL_APIKEY = os.environ.get('EDJANGO_EMAIL_APIKEY', None)
 
 
 # ------------------------------
@@ -169,11 +171,11 @@ LOGGING = {
     },
  
     'loggers': {
-        'django.request': {
-            'handlers': ['console'], #['mail_admins'],
-            'level': DJANGO_LOG_LEVEL,
-            'propagate': True,
-        },
+        #'django.request': {
+        #    'handlers': ['console'], #['mail_admins'],
+        #    'level': DJANGO_LOG_LEVEL,
+        #    'propagate': True,
+        #},
         'edjango': {
             'handlers': ['console'], #['mail_admins'],
             'level': EDJANGO_LOG_LEVEL,

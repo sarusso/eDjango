@@ -36,7 +36,7 @@ ONGOING_SIGNUPS = {}
 def public_view(wrapped_view):
     def public_view_wrapper(request):
         # -------------- START Public/private common code --------------
-        log_user_activity("DEBUG", "Called", request, wrapped_view)
+        log_user_activity("DEBUG", "Called", request, wrapped_view.__name__)
         try:
             
             # Try to get the templates from view kwargs
@@ -68,9 +68,21 @@ def public_view(wrapped_view):
             else:
                 if isinstance(e, ErrorMessage):
                     error_text = str(e)
-                else:
-                    error_text = 'something went wrong'
-                    logger.error(format_exception(e))
+                else: 
+                    
+                    # Raise te exception if we are in debug mode
+                    if True: #settings.DEBUG:
+                        raise
+                        
+                    # Otherwise,
+                    else:
+                        
+                        # first log the exception
+                        logger.error(format_exception(e))
+                        
+                        # and then mask it.
+                        error_text = 'something went wrong'
+                        
                 data = {'user': request.user,
                         'title': 'Error',
                         'error' : 'Error: "{}"'.format(error_text)}
@@ -141,7 +153,7 @@ def private_view(wrapped_view):
 
 
 
-def login_view(request, template, redirect):
+def login_template(request, redirect):
     
     # If authenticated user reloads the main URL
     if request.method == 'GET' and request.user.is_authenticated():
@@ -169,7 +181,7 @@ def login_view(request, template, redirect):
                     login(request, user)
                     return HttpResponseRedirect(redirect)
                 else:
-                    return render(request, template, {'error': 'Check user/password, cannot log in!'})
+                    raise ErrorMessage('Check email/password, cannot log in!')
             else:
                 
                 # If empty password, send mail with login token
@@ -189,8 +201,8 @@ def login_view(request, template, redirect):
                 send_email(to=user.email, subject='{} login link'.format(EDJANGO_PROJECT_NAME), text='Hello,\n\nhere is your login link: {}/login/?token={}\n\nOnce logged in, you can go to "My Account" and change password (or just keep using the login link feature).\n\nThe {} Team.'.format(EDJANGO_PUBLIC_HTTP_HOST, token, EDJANGO_PROJECT_NAME))
                
                 # Return here, we don't want to give any hints about existing users
-                data = {'success': 'Ok, if we have your data in our systems you will receive a login link by email shortly.'}
-                return render(request, 'success.html', {'data': data})
+                data = {'success': 'Ok, you will receive a login link by email shortly.'}
+                return data
                     
                 
         else:
@@ -201,7 +213,7 @@ def login_view(request, template, redirect):
     else:
         # If we are logging in through a token
         token = request.GET.get('token', None)
-        logger.debug('TOKEN:"{}"'.format(token))
+
         if token:
             
             loginTokens = LoginToken.objects.filter(token=token)
@@ -230,10 +242,10 @@ def login_view(request, template, redirect):
             return HttpResponseRedirect(redirect)
 
                 
-    # All other cases, render the login page again
-    return render(request, template)
+    # All other cases, render the login page again with no data
+    return None
 
-def logout_view(request, redirect):
+def logout_template(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
 

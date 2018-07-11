@@ -84,7 +84,7 @@ if not settings.DEBUG:
         else:
             logger.warning('Not static files to serve?!')
 else:
-    logger.info('Not serving static files as DEBUG=True (Django will do it automatically)'.format(app, document_root))
+    logger.info('Not serving static files at all as DEBUG=True (Django will do it automatically)')
 
 
 

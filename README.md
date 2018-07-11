@@ -45,8 +45,15 @@ You can configure things like project name, databse parameters, log levels and e
 	# Logging
 	DJANGO_LOG_LEVEL=ERROR
 	EDJANGO_LOG_LEVEL=ERROR
-	EDJANGO_HARD_DEBUG=False
 	
+	# Debugging
+	DJANGO_DEBUG=False
+
+Setting the DJANGO_DEBUG mode causes to enable the devleopment server in full mode, to have much more verbose 500 error pages with all the stack traces and context (the classic Django yellow page) and to have stacktraces logged on more than one line (by defautl they are logged one per line to play nice with log aggregation tools)
+
+If DJANGO_DEBUG is not set the development server can still run but it will hide all info abiut errors an serve static files only if the eDjango project is composed by only one app (excluding the base_app). This is useful for beta testing but for real production you should use a proper server and use the "collect static" machinery.
+
+
 
 	
 
