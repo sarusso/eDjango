@@ -62,35 +62,32 @@ def public_view(wrapped_view):
                 #logger.debug('using returned httpresponse')
                 return data
 
-        except Exception as e:    
-            if settings.RAISE_EXCEPTIONS:
-                raise e
-            else:
-                if isinstance(e, ErrorMessage):
-                    error_text = str(e)
-                else: 
+        except Exception as e:
+            if isinstance(e, ErrorMessage):
+                error_text = str(e)
+            else: 
+                
+                # Raise te exception if we are in debug mode
+                if settings.DEBUG:
+                    raise
                     
-                    # Raise te exception if we are in debug mode
-                    if True: #settings.DEBUG:
-                        raise
-                        
-                    # Otherwise,
-                    else:
-                        
-                        # first log the exception
-                        logger.error(format_exception(e))
-                        
-                        # and then mask it.
-                        error_text = 'something went wrong'
-                        
-                data = {'user': request.user,
-                        'title': 'Error',
-                        'error' : 'Error: "{}"'.format(error_text)}
-                #logger.debug(data)
-                if template:
-                    return render(request, template, {'data': data})
+                # Otherwise,
                 else:
-                    return render(request, 'error.html', {'data': data})
+                    
+                    # first log the exception
+                    logger.error(format_exception(e))
+                    
+                    # and then mask it.
+                    error_text = 'something went wrong'
+                    
+            data = {'user': request.user,
+                    'title': 'Error',
+                    'error' : 'Error: "{}"'.format(error_text)}
+            #logger.debug(data)
+            if template:
+                return render(request, template, {'data': data})
+            else:
+                return render(request, 'error.html', {'data': data})
         # --------------  END Public/private common code --------------        
     return public_view_wrapper
 
@@ -126,22 +123,31 @@ def private_view(wrapped_view):
                     return data
     
             except Exception as e:    
-                if settings.RAISE_EXCEPTIONS:
-                    raise e
-                else:
-                    if isinstance(e, ErrorMessage):
-                        error_text = str(e)
+                if isinstance(e, ErrorMessage):
+                    error_text = str(e)
+                else: 
+                    
+                    # Raise te exception if we are in debug mode
+                    if settings.DEBUG:
+                        raise
+                        
+                    # Otherwise,
                     else:
-                        error_text = 'something went wrong'
+                        
+                        # first log the exception
                         logger.error(format_exception(e))
-                    data = {'user': request.user,
-                            'title': 'Error',
-                            'error' : 'Error: "{}"'.format(error_text)}
-                    #logger.debug(data)
-                    if template:
-                        return render(request, template, {'data': data})
-                    else:
-                        return render(request, 'error.html', {'data': data})
+                        
+                        # and then mask it.
+                        error_text = 'something went wrong'
+                        
+                data = {'user': request.user,
+                        'title': 'Error',
+                        'error' : 'Error: "{}"'.format(error_text)}
+                #logger.debug(data)
+                if template:
+                    return render(request, template, {'data': data})
+                else:
+                    return render(request, 'error.html', {'data': data})
             # --------------  END  Public/private common code --------------
 
         else:
@@ -153,7 +159,7 @@ def private_view(wrapped_view):
 
 
 
-def login_template(request, redirect):
+def login_view_template(request, redirect):
     
     # If authenticated user reloads the main URL
     if request.method == 'GET' and request.user.is_authenticated():
@@ -245,11 +251,11 @@ def login_template(request, redirect):
     # All other cases, render the login page again with no data
     return None
 
-def logout_template(request, redirect):
+def logout_view_template(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
 
-def register_template(request, redirect, invitation_code=None, callback=None):
+def register_view_template(request, redirect, invitation_code=None, callback=None):
     '''Register a user. Call the "callback" function with the User object just created on success
     '''
 
