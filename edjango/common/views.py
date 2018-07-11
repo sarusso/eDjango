@@ -36,7 +36,7 @@ ONGOING_SIGNUPS = {}
 def public_view(wrapped_view):
     def public_view_wrapper(request):
         # -------------- START Public/private common code --------------
-        log_user_activity("DEBUG", "Called", request)
+        log_user_activity("DEBUG", "Called", request, wrapped_view)
         try:
             
             # Try to get the templates from view kwargs
@@ -87,7 +87,7 @@ def private_view(wrapped_view):
     def private_view_wrapper(request):
         if request.user.is_authenticated():
             # -------------- START Public/private common code --------------
-            log_user_activity("DEBUG", "Called", request)
+            log_user_activity("DEBUG", "Called", request, wrapped_view.__name__)
             try:
                 
                 # Try to get the templates from view kwargs
