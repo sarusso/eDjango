@@ -43,22 +43,23 @@ def booleanize(*args, **kwargs):
 
 def send_email(to, subject, text):
 
-    import sendgrid
-    from sendgrid.helpers.mail import *
-    
     # Importing here instead of on top avoids circular dependencies problems when loading booleanize in settings
-    from edjango.settings import EDJANGO_EMAIL_APIKEY, EDJANGO_EMAIL_FROM
+    from edjango.settings import EDJANGO_EMAIL_APIKEY, EDJANGO_EMAIL_FROM, EDJANGO_EMAIL_METHOD
 
-    sg = sendgrid.SendGridAPIClient(apikey=EDJANGO_EMAIL_APIKEY)
-    from_email = Email(EDJANGO_EMAIL_FROM)
-    to_email = Email(to)
-    subject = subject
-    content = Content('text/plain', text)
-    mail = Mail(from_email, subject, to_email, content)
-    response = sg.client.mail.send.post(request_body=mail.get())
-    #logger.debug(response.status_code)
-    #logger.debug(response.body)
-    #logger.debug(response.headers)
+    if EDJANGO_EMAIL_METHOD == 'Sendgrid':
+        import sendgrid
+        from sendgrid.helpers.mail import *
+        
+        sg = sendgrid.SendGridAPIClient(apikey=EDJANGO_EMAIL_APIKEY)
+        from_email = Email(EDJANGO_EMAIL_FROM)
+        to_email = Email(to)
+        subject = subject
+        content = Content('text/plain', text)
+        mail = Mail(from_email, subject, to_email, content)
+        response = sg.client.mail.send.post(request_body=mail.get())
+        #logger.debug(response.status_code)
+        #logger.debug(response.body)
+        #logger.debug(response.headers)
     
 
 

@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from edjango.common.utils import discover_apps
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -125,7 +126,11 @@ STATIC_URL = '/static/'
 
 EDJANGO_PROJECT_NAME = os.environ.get('EDJANGO_PROJECT_NAME', 'eDjango Project')
 EDJANGO_PUBLIC_HTTP_HOST = os.environ.get('EDJANGO_PUBLIC_HTTP_HOST', 'http://localhost:8080')
-EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'info@edjango.project')
+
+EDJANGO_EMAIL_METHOD = os.environ.get('EDJANGO_EMAIL_METHOD', 'Sendgrid')
+if not EDJANGO_EMAIL_METHOD in ['Sendgrid', None]:
+    raise ImproperlyConfigured('Invalid EDJANGO_EMAIL_METHOD ("{}")'.format(EDJANGO_EMAIL_METHOD))
+EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'ejango project <info@edjango.project>')
 EDJANGO_EMAIL_APIKEY = os.environ.get('EDJANGO_EMAIL_APIKEY', None)
 
 
