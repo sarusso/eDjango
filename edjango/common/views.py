@@ -161,6 +161,9 @@ def private_view(wrapped_view):
 
 def login_view_template(request, redirect):
     
+    data = {}
+    data['title'] = "Login"
+
     # If authenticated user reloads the main URL
     if request.method == 'GET' and request.user.is_authenticated():
         return HttpResponseRedirect(redirect)
@@ -207,7 +210,7 @@ def login_view_template(request, redirect):
                 send_email(to=user.email, subject='{} login link'.format(EDJANGO_PROJECT_NAME), text='Hello,\n\nhere is your login link: {}/login/?token={}\n\nOnce logged in, you can go to "My Account" and change password (or just keep using the login link feature).\n\nThe {} Team.'.format(EDJANGO_PUBLIC_HTTP_HOST, token, EDJANGO_PROJECT_NAME))
                
                 # Return here, we don't want to give any hints about existing users
-                data = {'success': 'Ok, you will receive a login link by email shortly.'}
+                data['success'] = 'Ok, you will receive a login link by email shortly.'
                 return data
                     
                 
@@ -248,8 +251,9 @@ def login_view_template(request, redirect):
             return HttpResponseRedirect(redirect)
 
                 
-    # All other cases, render the login page again with no data
-    return None
+    # All other cases, render the login page again with no other data than title
+    return data
+
 
 def logout_view_template(request, redirect):
     logout(request)
