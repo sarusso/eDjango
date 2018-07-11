@@ -127,9 +127,9 @@ STATIC_URL = '/static/'
 EDJANGO_PROJECT_NAME = os.environ.get('EDJANGO_PROJECT_NAME', 'eDjango Project')
 EDJANGO_PUBLIC_HTTP_HOST = os.environ.get('EDJANGO_PUBLIC_HTTP_HOST', 'http://localhost:8080')
 
-EDJANGO_EMAIL_METHOD = os.environ.get('EDJANGO_EMAIL_METHOD', 'Sendgrid')
-if not EDJANGO_EMAIL_METHOD in ['Sendgrid', None]:
-    raise ImproperlyConfigured('Invalid EDJANGO_EMAIL_METHOD ("{}")'.format(EDJANGO_EMAIL_METHOD))
+EDJANGO_EMAIL_SERVICE = os.environ.get('EDJANGO_EMAIL_SERVICE', 'Sendgrid')
+if not EDJANGO_EMAIL_SERVICE in ['Sendgrid', None]:
+    raise ImproperlyConfigured('Invalid EDJANGO_EMAIL_METHOD ("{}")'.format(EDJANGO_EMAIL_SERVICE))
 EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'ejango project <info@edjango.project>')
 EDJANGO_EMAIL_APIKEY = os.environ.get('EDJANGO_EMAIL_APIKEY', None)
 

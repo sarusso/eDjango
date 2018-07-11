@@ -44,9 +44,9 @@ def booleanize(*args, **kwargs):
 def send_email(to, subject, text):
 
     # Importing here instead of on top avoids circular dependencies problems when loading booleanize in settings
-    from edjango.settings import EDJANGO_EMAIL_APIKEY, EDJANGO_EMAIL_FROM, EDJANGO_EMAIL_METHOD
+    from edjango.settings import EDJANGO_EMAIL_APIKEY, EDJANGO_EMAIL_FROM, EDJANGO_EMAIL_SERVICE
 
-    if EDJANGO_EMAIL_METHOD == 'Sendgrid':
+    if EDJANGO_EMAIL_SERVICE == 'Sendgrid':
         import sendgrid
         from sendgrid.helpers.mail import *
         
