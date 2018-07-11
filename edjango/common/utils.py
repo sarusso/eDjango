@@ -110,7 +110,6 @@ def log_user_activity(level, msg, request):
     logger.log(level, msg)
 
 
-
 def username_hash(email):
     '''Create md5 base 64 (25 chrars) hash from user email:'''             
     m = hashlib.md5()
@@ -119,7 +118,7 @@ def username_hash(email):
     return username
 
 
-def random_username(email):
+def random_username():
     '''Create a random string of 156 chars to be used as username'''             
     username = ''.join(random.choice('abcdefghilmnopqrtuvz') for _ in range(16))
     return username

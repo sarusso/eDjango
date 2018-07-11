@@ -187,5 +187,5 @@ LOGGING = {
     }
 }
 
-
+RAISE_EXCEPTIONS = False
 

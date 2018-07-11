@@ -11,6 +11,8 @@ import uuid
 import json
 import socket
 import os
+import inspect
+from edjango import settings
 
 from edjango.base_app.models import LoginToken
 from edjango.common.utils import send_email, format_exception, log_user_activity, random_username
@@ -21,7 +23,7 @@ from edjango.settings import EDJANGO_PROJECT_NAME, EDJANGO_PUBLIC_HTTP_HOST
 import logging
 logger = logging.getLogger(__name__)
 
-from edjango.common.exceptions import ErrorMessage
+from edjango.common.exceptions import ErrorMessage, ConsistencyException
 
 # This is a support array used to prevent double click problems
 ONGOING_SIGNUPS = {}
@@ -30,13 +32,40 @@ ONGOING_SIGNUPS = {}
 #  Decorators
 #=========================
 
-def private_view(func):
-    def func_wrapper(request):
-        if request.user.is_authenticated():
-            log_user_activity("DEBUG", "Called", request)
-            try:
-                return func(request)
-            except Exception as e:
+# Public view
+def public_view(wrapped_view):
+    def public_view_wrapper(request):
+        # -------------- START Public/private common code --------------
+        log_user_activity("DEBUG", "Called", request)
+        try:
+            
+            # Try to get the templates from view kwargs
+            # Todo: Python3 compatibility: https://stackoverflow.com/questions/2677185/how-can-i-read-a-functions-signature-including-default-argument-values
+
+            argSpec=inspect.getargspec(wrapped_view)
+
+            if 'template' in argSpec.args:
+                template = argSpec.defaults[0]
+            else:
+                template = None
+            
+            # Call wrapped view
+            data = wrapped_view(request)
+            
+            if not isinstance(data, HttpResponse):
+                if template:
+                    #logger.debug('using template + data ("{}","{}")'.format(template,data))
+                    return render(request, template, {'data': data})
+                else:
+                    raise ConsistencyException('Got plain "data" output but no tempate defined in view')
+            else:
+                #logger.debug('using returned httpresponse')
+                return data
+
+        except Exception as e:    
+            if settings.RAISE_EXCEPTIONS:
+                raise e
+            else:
                 if isinstance(e, ErrorMessage):
                     error_text = str(e)
                 else:
@@ -45,29 +74,68 @@ def private_view(func):
                 data = {'user': request.user,
                         'title': 'Error',
                         'error' : 'Error: "{}"'.format(error_text)}
-            return render(request, 'error.html', {'data': data})
-        
+                #logger.debug(data)
+                if template:
+                    return render(request, template, {'data': data})
+                else:
+                    return render(request, 'error.html', {'data': data})
+        # --------------  END Public/private common code --------------        
+    return public_view_wrapper
+
+# Private view
+def private_view(wrapped_view):
+    def private_view_wrapper(request):
+        if request.user.is_authenticated():
+            # -------------- START Public/private common code --------------
+            log_user_activity("DEBUG", "Called", request)
+            try:
+                
+                # Try to get the templates from view kwargs
+                # Todo: Python3 compatibility: https://stackoverflow.com/questions/2677185/how-can-i-read-a-functions-signature-including-default-argument-values
+    
+                argSpec=inspect.getargspec(wrapped_view)
+    
+                if 'template' in argSpec.args:
+                    template = argSpec.defaults[0]
+                else:
+                    template = None
+                
+                # Call wrapped view
+                data = wrapped_view(request)
+                
+                if not isinstance(data, HttpResponse):
+                    if template:
+                        #logger.debug('using template + data ("{}","{}")'.format(template,data))
+                        return render(request, template, {'data': data})
+                    else:
+                        raise ConsistencyException('Got plain "data" output but no tempate defined in view')
+                else:
+                    #logger.debug('using returned httpresponse')
+                    return data
+    
+            except Exception as e:    
+                if settings.RAISE_EXCEPTIONS:
+                    raise e
+                else:
+                    if isinstance(e, ErrorMessage):
+                        error_text = str(e)
+                    else:
+                        error_text = 'something went wrong'
+                        logger.error(format_exception(e))
+                    data = {'user': request.user,
+                            'title': 'Error',
+                            'error' : 'Error: "{}"'.format(error_text)}
+                    #logger.debug(data)
+                    if template:
+                        return render(request, template, {'data': data})
+                    else:
+                        return render(request, 'error.html', {'data': data})
+            # --------------  END  Public/private common code --------------
+
         else:
             log_user_activity("DEBUG", "Redirecting to login since not authenticated", request)
             return HttpResponseRedirect('/login')               
-    return func_wrapper
-
-def public_view(func):
-    def func_wrapper(request):
-        log_user_activity("DEBUG", "Called", request)
-        try:
-            return func(request)
-        except Exception as e:
-            if isinstance(e, ErrorMessage):
-                error_text = str(e)
-            else:
-                error_text = 'something went wrong'
-                logger.error(format_exception(e))
-            data = {'user': request.user,
-                    'title': 'Error',
-                    'error' : 'Error: "{}"'.format(error_text)}
-        return render(request, 'error.html', {'data': data})           
-    return func_wrapper
+    return private_view_wrapper
 
 
 
@@ -93,7 +161,7 @@ def login_view(request, template, redirect):
                     user = User.objects.get(email=username)
                     username = user.username
                 except User.DoesNotExist:
-                    return render(request, template, {'error': 'Check email/password, cannot log in!'})
+                    raise ErrorMessage('Check email/password, cannot log in!')
             
             if password:
                 user = authenticate(username=username, password=password)
@@ -165,14 +233,13 @@ def login_view(request, template, redirect):
     # All other cases, render the login page again
     return render(request, template)
 
-
-
 def logout_view(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
 
-
-def register_view(request, invitation_code, redirect):
+def register_template(request, redirect, invitation_code=None, callback=None):
+    '''Register a user. Call the "callback" function with the User object just created on success
+    '''
 
     # user var
     user = None
@@ -189,7 +256,7 @@ def register_view(request, invitation_code, redirect):
     invitation = request.POST.get('invitation', None) # Verification code set for anyone
 
     if request.user.is_authenticated():
-        return (user, HttpResponseRedirect(redirect))
+        return(HttpResponseRedirect(redirect))
 
     else:
 
@@ -198,18 +265,16 @@ def register_view(request, invitation_code, redirect):
             # Check both email and password are set
             if not email:
                 data['error'] = 'Missing email'
-                return (user, render(request, 'error.html', {'data': data}))
+                return(render(request, 'error.html', {'data': data}))
          
             if not password:
                 data['error'] = 'Missing password'
-                return (user, render(request, 'error.html', {'data': data}))
+                return(render(request, 'error.html', {'data': data}))
          
             # Check if we have to validate an invitation code
             if invitation_code:
                 if invitation != invitation_code:
-                    data['status'] = 'wrong_invite'
-                    return (user, render(request, 'register.html', {'data': data}))
-
+                    raise ErrorMessage('The invitation code you entered is not valid.')
             
             if not email in ONGOING_SIGNUPS:
                 
@@ -218,21 +283,14 @@ def register_view(request, invitation_code, redirect):
                 
                 # Check if user with this email already exists
                 if len(User.objects.filter(email = email)) > 0:
-                    data['error'] = 'The email address you entered is already registered.'
-                    return (user, render(request, 'error.html', {'data': data}))
-                
-                # Register the user
-                username = random_username(email) # It is actually a random string
-                try:
-                    user = User.objects.create_user(username, password=password, email=email)
-                except Exception as e:
-                    logger.error('Got exception when creating the user: {}'.format(format_exception(e)))
-                    data['error'] = 'Error in creating the user. Please try again and if the error persists contact us at info@symplitica.com'
                     del ONGOING_SIGNUPS[email]
-                    return (user, render(request, 'error.html', {'data': data}))
+                    raise ErrorMessage('The email address you entered is already registered.')
+  
+                # Register the user
+                user = User.objects.create_user(random_username(), password=password, email=email)
 
                 # Is this necessary?
-                user.save() 
+                user.save()
                 
                 # Manually set the auth backend for the user
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -240,11 +298,15 @@ def register_view(request, invitation_code, redirect):
                 
                 data['status'] = 'activated'
                 data['user'] = user
+
+                # Call the callback if any
+                if callback:
+                    callback(user)
                 
                 # Remove user from recent signups
                 del ONGOING_SIGNUPS[email]
                 
-                return (user, render(request, 'register.html', {'data': data}))
+                return(render(request, 'register.html', {'data': data}))
             
             else:
 
@@ -258,24 +320,24 @@ def register_view(request, invitation_code, redirect):
                         i+=1
                     if i>30:
                         data['error'] = 'Timed up. Your user might have been correctly created anyway. Please try to login if it does not work to signup again, if the error persists contact us at info@symplitica.com'
-                        return (user, render(request, 'error.html', {'data': data}))
+                        return(render(request, 'error.html', {'data': data}))
 
                 users_with_this_email = User.objects.filter(email = email)
                 if users_with_this_email<1:
                     data['error'] = 'Error in creating the user. Please try again and if the error persists contact us at info@symplitica.com'
-                    return (user, render(request, 'error.html', {'data': data}))
+                    return(render(request, 'error.html', {'data': data}))
                 else:
                     data['status'] = 'activated'
                     data['user'] = users_with_this_email[0]
                     user = authenticate(username=users_with_this_email[0].username, password=password)
                     if not user:
                         data['error'] = 'Error. Please try again and if the error persists contact us at info@symplitica.com'
-                        return (user, render(request, 'error.html', {'data': data}))
+                        return(render(request, 'error.html', {'data': data}))
                     login(request, user)
-                    return (user, render(request, 'register.html', {'data': data}))   
+                    return(render(request, 'register.html', {'data': data}))   
 
         else:
-            return (user, render(request, 'register.html', {'data': data}))
+            return(render(request, 'register.html', {'data': data}))
 
 
 
