@@ -1,6 +1,6 @@
 # eDjango
 
-An extended Django, for avoing to write the same stuff over and over again. Makes strong use of fabric for automating tasks.
+An extended Django, to avoid writing the same stuff over and over again. Makes strong use of fabric for automating tasks.
 
 By default uses Django version 1.8.4 but should work up to the latest official version - just change it in the requirements.
 
@@ -8,7 +8,7 @@ By default uses Django version 1.8.4 but should work up to the latest official v
 Usage:
 ------
 
-Clone/download the repo, install requirements, and create you app in eDjango/edjango/your_app. You probably want to hardlink against another folder/repo. Note that the suffix "_app" is mandatory.
+Clone/download the repo, install requirements, and create you app in eDjango/edjango/your_app. You probably want to hard-link against another folder/repo. Note that the suffix "_app" is mandatory.
 
 
 The structure for "your_app" is then almost the same as an usual (entire) Django project - except that in this case is completely decoupled from Django itself.
@@ -16,13 +16,13 @@ The structure for "your_app" is then almost the same as an usual (entire) Django
 
 It has to include the standard models.py, settings.py, urls.py and views.py files, as well as the static and templates folders.
 
-That's it, eDjango implements automatic app disovery so yo don't have to do anything else.
+That's it, eDjango implements automatic app discovery so yo don't have to do anything else.
 
 
 Configuration:
 ------
 
-You can configure things like project name, databse parameters, log levels and email service via environment variables. A list of the configurable environments variables with their default values is shown below. The accepted lovels are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+You can configure things like project name, database parameters, log levels and email service via environment variables. A list of the configurable environments variables with their default values is shown below. The accepted levels are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
 
 
 	# Project conf
@@ -49,9 +49,9 @@ You can configure things like project name, databse parameters, log levels and e
 	# Debugging
 	DJANGO_DEBUG=False
 
-Setting the DJANGO_DEBUG mode causes to enable the devleopment server in full mode, to have much more verbose 500 error pages with all the stack traces and context (the classic Django yellow page) and to have stacktraces logged on more than one line (by defautl they are logged one per line to play nice with log aggregation tools)
+Setting the DJANGO_DEBUG mode causes to enable the development server in full mode, to have much more verbose 500 error pages with all the stack traces and context (the classic Django yellow page) and to have stack-traces logged on more than one line (by default they are logged one per line to play nice with log aggregation tools)
 
-If DJANGO_DEBUG is not set the development server can still run but it will hide all info abiut errors an serve static files only if the eDjango project is composed by only one app (excluding the base_app). This is useful for beta testing but for real production you should use a proper server and use the "collect static" machinery.
+If DJANGO_DEBUG is not set the development server can still run but it will hide all info about errors an serve static files only if the eDjango project is composed by only one app (excluding the base_app). This is useful for beta testing but for real production you should use a proper server and use the "collect static" machinery.
 
 
 
