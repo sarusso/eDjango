@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'edjango.wsgi.application'
 default_db_engine = 'django.db.backends.sqlite3'
 default_db_name   = os.path.join(BASE_DIR, '../db-edjango.sqlite3')
 if not os.environ.get('DJANGO_DB_NAME'):
-    print '\nSETTINGS WARNING: I will use the default DB! -> {}\n'.format(default_db_name)
+    print('\nSETTINGS WARNING: I will use the default DB! -> {}\n'.format(default_db_name))
 
 DATABASES = {
     'default': {

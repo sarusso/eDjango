@@ -16,4 +16,4 @@ for app in discover_apps('edjango', only_names=True):
         app_settings_module = 'edjango.{}.settings'.format(app)
 
         # A bit triky but should be fine...
-        exec 'from {} import *'.format(app_settings_module)
+        exec('from {} import *'.format(app_settings_module))

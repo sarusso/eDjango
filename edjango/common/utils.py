@@ -49,8 +49,8 @@ def send_email(to, subject, text):
 
     if EDJANGO_EMAIL_SERVICE == 'Sendgrid':
         import sendgrid
-        from sendgrid.helpers.mail import *
-        
+        from sendgrid.helpers.mail import Email,Content
+
         sg = sendgrid.SendGridAPIClient(apikey=EDJANGO_EMAIL_APIKEY)
         from_email = Email(EDJANGO_EMAIL_FROM)
         to_email = Email(to)

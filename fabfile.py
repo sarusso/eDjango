@@ -11,13 +11,16 @@ if not os.path.isfile('manage.py'):
     else:
         abort('Sorry, could not find fabfile. Are you in the root directory or in an app directory?')
 
+# Set Python executable
+PYTHON = os.environ.get('EDJANGO_PYTHON', 'python')
+
 #--------------------
 # Utility functions
 #--------------------
 
 def run(command):
     local(command)
-        
+
 
 #--------------------
 # Run
@@ -25,7 +28,7 @@ def run(command):
 
 @task
 def shell():
-    run('python manage.py shell')
+    run('{} manage.py shell'.format(PYTHON))
 
 
 @task
@@ -33,9 +36,9 @@ def runserver(noreload=False):
     if isinstance(noreload,str) and noreload.upper()=='FALSE':
         noreload=False
     if noreload:
-        run('python manage.py runserver 0.0.0.0:8080 --noreload')
+        run('{} manage.py runserver 0.0.0.0:8080 --noreload'.format(PYTHON))
     else:
-        run('python manage.py runserver 0.0.0.0:8080')
+        run('{} manage.py runserver 0.0.0.0:8080'.format(PYTHON))
 
 
 #-----------------------------
@@ -44,11 +47,11 @@ def runserver(noreload=False):
 
 @task
 def install(what=None, env="local", noinput=False):
-    run("python manage.py makemigrations")
+    run('{} manage.py makemigrations'.format(PYTHON))
     if noinput:
-        run("python manage.py migrate --noinput")
+        run('{} manage.py migrate --noinput'.format(PYTHON))
     else:
-        run("python manage.py migrate")
+        run('{} manage.py migrate'.format(PYTHON))
 
 
 #-----------------------------
@@ -56,16 +59,16 @@ def install(what=None, env="local", noinput=False):
 #-----------------------------
 @task
 def populate(env="local"):
-    
+
     for app in discover_apps('edjango', only_names=True):
-        
+
         # Check if we have the populate:
         populate_file = 'edjango/{}/management/commands/{}_populate.py'.format(app,app)
         if os.path.isfile(populate_file):
-            print 'Poulate found for {} and executing...'.format(app)
-            run("python manage.py {}_populate".format(app))
+            print('Poulate found for {} and executing...'.format(app))
+            run('{} manage.py {}_populate'.format(PYTHON, app))
         else:
-            print 'No poulate found for {}... ({})'.format(app,populate_file)
+            print('No poulate found for {}... ({})'.format(app,populate_file))
 
 
 #-----------------------------
@@ -75,22 +78,22 @@ def populate(env="local"):
 def management(app=None, command=None, env="local"):
     if not app or not command:
         raise Exception('app and command are required!')
-    run("python manage.py {}_{}".format(app,command))
+    run("{} manage.py {}_{}".format(PYTHON,app,command))
 
 #-----------------------------
 #   Migrations
 #-----------------------------
 @task
 def makemigrations(what=None, env="local"):
-    run("python manage.py makemigrations")
+    run('{} manage.py makemigrations'.format(PYTHON))
 
 
 @task
 def migrate(app=None):
     if app:
-        run('python manage.py migrate {}'.format(app))
+        run('{} manage.py migrate {}'.format(PYTHON,app))
     else:
-        run('python manage.py migrate')        
+        run('{} manage.py migrate'.format(PYTHON))
 
 
 #-----------------------------
@@ -98,7 +101,7 @@ def migrate(app=None):
 #-----------------------------
 @task
 def test():
-    run("python manage.py test")
+    run('{} manage.py test'.format(PYTHON))
 
 
 #-----------------------------
@@ -106,7 +109,7 @@ def test():
 #-----------------------------
 @task
 def collect():
-    run('python manage.py collectstatic')
+    run('{} manage.py collectstatic'.format(PYTHON))
 
 
 
