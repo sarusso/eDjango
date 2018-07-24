@@ -7,7 +7,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         if not User.objects.filter(username='admin').exists():
-            print 'Creating default admin: user=admin, pass=admin. Change it!!'
+            print('Creating default admin: user=admin, pass=admin. Change it!!')
             admin = User.objects.create_superuser('admin', 'admin@edjango.local', 'admin')
             admin.save()
 
