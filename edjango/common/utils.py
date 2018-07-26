@@ -49,7 +49,7 @@ def send_email(to, subject, text):
 
     if EDJANGO_EMAIL_SERVICE == 'Sendgrid':
         import sendgrid
-        from sendgrid.helpers.mail import Email,Content
+        from sendgrid.helpers.mail import Email,Content,Mail
 
         sg = sendgrid.SendGridAPIClient(apikey=EDJANGO_EMAIL_APIKEY)
         from_email = Email(EDJANGO_EMAIL_FROM)
@@ -209,3 +209,26 @@ def os_shell(command, capture=False, verbose=False, interactive=False, silent=Fa
             return True
 
 
+def get_md5(string):
+    if not string:
+        raise Exception("Colund not compute md5 of empty/None value")
+    
+    m = hashlib.md5()
+    
+    # Fix for Python3
+    try:
+        if isinstance(string,unicode):
+            string=string.encode('utf-8')
+    except NameError:
+        string=string.encode('utf-8')
+        
+    m.update(string)
+    md5 = str(m.hexdigest())
+    return md5
+
+
+def fix_url_encode(url):
+    url_unicode =  unicode(url)              
+    url_sanitized = url_unicode.encode('utf-8')              
+    url_cleaned = urllib.unquote(url_sanitized)
+    return url_cleaned    
