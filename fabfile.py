@@ -100,8 +100,11 @@ def migrate(app=None):
 #   Tests
 #-----------------------------
 @task
-def test():
-    run('{} manage.py test'.format(PYTHON))
+def test(what=None):
+    if what:
+        run('{} manage.py test {}'.format(PYTHON, what))
+    else:
+        run('{} manage.py test'.format(PYTHON))
 
 
 #-----------------------------
