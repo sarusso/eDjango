@@ -182,7 +182,12 @@ def login_view_template(request, redirect):
                     user = User.objects.get(email=username)
                     username = user.username
                 except User.DoesNotExist:
-                    raise ErrorMessage('Check email/password, cannot log in!')
+                    if password:
+                        raise ErrorMessage('Check email and password')
+                    else:
+                        # Return here, we don't want to give any hints about existing users
+                        data['success'] = 'Ok, you will receive a login link by email shortly.'
+                        return data
             
             if password:
                 user = authenticate(username=username, password=password)
@@ -190,7 +195,7 @@ def login_view_template(request, redirect):
                     login(request, user)
                     return HttpResponseRedirect(redirect)
                 else:
-                    raise ErrorMessage('Check email/password, cannot log in!')
+                    raise ErrorMessage('Check email and password')
             else:
                 
                 # If empty password, send mail with login token
