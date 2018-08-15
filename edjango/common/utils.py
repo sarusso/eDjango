@@ -1,15 +1,18 @@
-
 import os
 import traceback
 import hashlib
 import random
 import subprocess
+import logging
 from collections import namedtuple
 
-
 # Setup logging
-import logging
 logger = logging.getLogger(__name__)
+
+
+#======================
+#  Utility functions
+#======================
 
 def booleanize(*args, **kwargs):
     # Handle both single value and kwargs to get arg name
@@ -35,11 +38,6 @@ def booleanize(*args, **kwargs):
             return True
         else:
             return False
-            
-
-#=================
-#  Send email
-#=================
 
 
 def send_email(to, subject, text):
@@ -63,7 +61,6 @@ def send_email(to, subject, text):
         #logger.debug(response.headers)
     
 
-
 def format_exception(e, debug=False):
     
     # Importing here instead of on top avoids circular dependencies problems when loading booleanize in settings
@@ -76,9 +73,6 @@ def format_exception(e, debug=False):
         return str('Got exception "{}" of type "{}" with traceback "{}"'.format(e.__class__.__name__, type(e), traceback.format_exc().replace('\n', '|')))
 
 
-
-
-# Log user activity
 def log_user_activity(level, msg, request, caller=None):
 
     # Get the caller function name through inspect with some logic
@@ -132,12 +126,9 @@ def discover_apps(folder, only_names=False):
     return apps
 
 
-
-
-
-
 def sanitize_shell_encoding(text):
     return text.encode("utf-8", errors="ignore")
+
 
 def format_shell_error(stdout, stderr, exit_code):
     
