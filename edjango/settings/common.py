@@ -184,7 +184,7 @@ LOGGING = {
         'edjango': {
             'handlers': ['console'], #['mail_admins'],
             'level': EDJANGO_LOG_LEVEL,
-            'propagate': True,
+            'propagate': False,
         },
         'django': {
             'handlers': ['console'], #['mail_admins'],
