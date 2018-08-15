@@ -1,27 +1,16 @@
-"""edjango URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.8/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Add an import:  from blog import urls as blog_urls
-    2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
-"""
-
 import os
+import logging
+
+# Django imports
+import django
 from django.conf.urls import include, url
 from django.contrib import admin
+
+# eDjango imports
 from edjango import settings
 from edjango.common.utils import discover_apps
 
 # Setup logging
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -56,7 +45,6 @@ for app in apps:
 #============================
 
 # Get admin files location
-import django
 admin_files_path = '/'.join(django.__file__.split('/')[0:-1]) + '/contrib/admin/static/admin'
  
 if not settings.DEBUG:
