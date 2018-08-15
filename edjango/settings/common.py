@@ -178,19 +178,20 @@ LOGGING = {
         #'django.request': {
         #    'handlers': ['console'], #['mail_admins'],
         #    'level': DJANGO_LOG_LEVEL,
-        #    'propagate': True,
+        #    'propagate': False,
         #},
         'edjango': {
             'handlers': ['console'], #['mail_admins'],
             'level': EDJANGO_LOG_LEVEL,
-            'propagate': False, # Do not propagate or the 'django' logger will emit as well, and even at lower levels. 
+            'propagate': False, # Do not propagate or the root logger will emit as well, and even at lower levels. 
         },
-        # Read more about the 'django logger': https://docs.djangoproject.com/en/1.11/topics/logging/#django-logger
         'django': {
             'handlers': ['console'], #['mail_admins'],
             'level': DJANGO_LOG_LEVEL,
-            'propagate': True,
+            'propagate': False, # Do not propagate or the root logger will emit as well, and even at lower levels. 
         }, 
+        # Read more about the 'django' logger: https://docs.djangoproject.com/en/1.11/topics/logging/#django-logger
+        # Read more about logging in the right way: https://lincolnloop.com/blog/django-logging-right-way/
     }
 }
 
