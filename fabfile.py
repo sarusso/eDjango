@@ -46,11 +46,12 @@ def runserver(noreload=False):
 #-----------------------------
 
 @task
-def install(what=None, env="local", noinput=False):
-    run('{} manage.py makemigrations'.format(PYTHON))
+def install(what=None, env="local", noinput=False):    
     if noinput:
+        run('{} manage.py makemigrations --noinput'.format(PYTHON))
         run('{} manage.py migrate --noinput'.format(PYTHON))
     else:
+        run('{} manage.py makemigrations'.format(PYTHON))
         run('{} manage.py migrate'.format(PYTHON))
 
 
@@ -84,14 +85,16 @@ def management(app=None, command=None, env="local"):
 #   Migrations
 #-----------------------------
 @task
-def makemigrations(what=None, env="local"):
-    run('{} manage.py makemigrations'.format(PYTHON))
-
+def makemigrations(what=None, env="local", noinput=False):
+    if noinput:
+        run('{} manage.py makemigrations --noinput'.format(PYTHON))
+    else:
+        run('{} manage.py makemigrations'.format(PYTHON))
 
 @task
-def migrate(app=None):
-    if app:
-        run('{} manage.py migrate {}'.format(PYTHON,app))
+def migrate(app=None, noinput=False):
+    if noinput:
+        run('{} manage.py migrate --noinput'.format(PYTHON))
     else:
         run('{} manage.py migrate'.format(PYTHON))
 
