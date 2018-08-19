@@ -34,7 +34,7 @@ ONGOING_SIGNUPS = {}
 
 # Public view
 def public_view(wrapped_view):
-    def public_view_wrapper(request):
+    def public_view_wrapper(request, *argv, **kwargs):
         # -------------- START Public/private common code --------------
         log_user_activity("DEBUG", "Called", request, wrapped_view.__name__)
         try:
@@ -50,14 +50,14 @@ def public_view(wrapped_view):
                 template = None
             
             # Call wrapped view
-            data = wrapped_view(request)
+            data = wrapped_view(request, *argv, **kwargs)
             
             if not isinstance(data, HttpResponse):
                 if template:
                     #logger.debug('using template + data ("{}","{}")'.format(template,data))
                     return render(request, template, {'data': data})
                 else:
-                    raise ConsistencyException('Got plain "data" output but no tempate defined in view')
+                    raise ConsistencyException('Got plain "data" output but no template defined in view')
             else:
                 #logger.debug('using returned httpresponse')
                 return data
@@ -93,7 +93,7 @@ def public_view(wrapped_view):
 
 # Private view
 def private_view(wrapped_view):
-    def private_view_wrapper(request):
+    def private_view_wrapper(request, *argv, **kwargs):
         if request.user.is_authenticated():
             # -------------- START Public/private common code --------------
             log_user_activity("DEBUG", "Called", request, wrapped_view.__name__)
@@ -110,14 +110,14 @@ def private_view(wrapped_view):
                     template = None
                 
                 # Call wrapped view
-                data = wrapped_view(request)
+                data = wrapped_view(request, *argv, **kwargs)
                 
                 if not isinstance(data, HttpResponse):
                     if template:
                         #logger.debug('using template + data ("{}","{}")'.format(template,data))
                         return render(request, template, {'data': data})
                     else:
-                        raise ConsistencyException('Got plain "data" output but no tempate defined in view')
+                        raise ConsistencyException('Got plain "data" output but no template defined in view')
                 else:
                     #logger.debug('using returned httpresponse')
                     return data
