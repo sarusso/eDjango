@@ -28,6 +28,7 @@ from edjango.common.exceptions import ErrorMessage, ConsistencyException
 # This is a support array used to prevent double click problems
 ONGOING_SIGNUPS = {}
 
+
 #=========================
 #  Decorators
 #=========================
@@ -162,7 +163,7 @@ def private_view(wrapped_view):
 def login_view_template(request, redirect):
     
     data = {}
-    data['title'] = "Login"
+    data['title'] = "{} - Login".format(EDJANGO_PROJECT_NAME)
 
     # If authenticated user reloads the main URL
     if request.method == 'GET' and request.user.is_authenticated():
@@ -274,7 +275,7 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
     # Init data
     data={}
     data['user']   = request.user
-    data['title'] = "Register"
+    data['title'] = "{} - Register".format(EDJANGO_PROJECT_NAME)
     data['status'] = None
 
     # Get data
