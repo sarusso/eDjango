@@ -17,7 +17,7 @@ from edjango import settings
 from edjango.base_app.models import LoginToken
 from edjango.common.utils import send_email, format_exception, log_user_activity, random_username
 
-from edjango.settings import EDJANGO_PROJECT_NAME, EDJANGO_PUBLIC_HTTP_HOST 
+from edjango.settings import EDJANGO_PROJECT_NAME, EDJANGO_PUBLIC_HTTP_HOST, DEDICATED
 
 # Setup logging
 import logging
@@ -83,6 +83,7 @@ def public_view(wrapped_view):
                     
             data = {'user': request.user,
                     'title': 'Error',
+                    'dedicated': DEDICATED,
                     'error' : 'Error: "{}"'.format(error_text)}
             #logger.debug(data)
             if template:
@@ -143,6 +144,7 @@ def private_view(wrapped_view):
                         
                 data = {'user': request.user,
                         'title': 'Error',
+                        'dedicated': DEDICATED,
                         'error' : 'Error: "{}"'.format(error_text)}
                 #logger.debug(data)
                 if template:
@@ -164,6 +166,7 @@ def login_view_template(request, redirect, extra_data={}):
     
     data = {}
     data['title'] = "{} - Login".format(EDJANGO_PROJECT_NAME)
+    data['dedicated'] = DEDICATED
     data.update(extra_data)
 
     # If authenticated user reloads the main URL
@@ -278,6 +281,7 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
     data['user']   = request.user
     data['title'] = "{} - Register".format(EDJANGO_PROJECT_NAME)
     data['status'] = None
+    data['dedicated'] = DEDICATED
     data.update(extra_data)
 
     # Get data

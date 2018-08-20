@@ -132,6 +132,9 @@ if not EDJANGO_EMAIL_SERVICE in ['Sendgrid', None]:
 EDJANGO_EMAIL_FROM = os.environ.get('EDJANGO_EMAIL_FROM', 'ejango project <info@edjango.project>')
 EDJANGO_EMAIL_APIKEY = os.environ.get('EDJANGO_EMAIL_APIKEY', None)
 
+# Extra dedicated switch
+DEDICATED = booleanize(os.environ.get('DEDICATED', None))
+
 
 #===============================
 #  Logging
