@@ -160,10 +160,11 @@ def private_view(wrapped_view):
 
 
 
-def login_view_template(request, redirect):
+def login_view_template(request, redirect, extra_data={}):
     
     data = {}
     data['title'] = "{} - Login".format(EDJANGO_PROJECT_NAME)
+    data.update(extra_data)
 
     # If authenticated user reloads the main URL
     if request.method == 'GET' and request.user.is_authenticated():
@@ -265,7 +266,7 @@ def logout_view_template(request, redirect):
     logout(request)
     return HttpResponseRedirect(redirect)
 
-def register_view_template(request, redirect, invitation_code=None, callback=None):
+def register_view_template(request, redirect, invitation_code=None, callback=None, extra_data={}):
     '''Register a user. Call the "callback" function with the User object just created on success
     '''
 
@@ -277,6 +278,7 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
     data['user']   = request.user
     data['title'] = "{} - Register".format(EDJANGO_PROJECT_NAME)
     data['status'] = None
+    data.update(extra_data)
 
     # Get data
     email      = request.POST.get('email', None)
