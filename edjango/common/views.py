@@ -191,7 +191,7 @@ def login_view_template(request, redirect, extra_data={}):
                         raise ErrorMessage('Check email and password')
                     else:
                         # Return here, we don't want to give any hints about existing users
-                        data['success'] = 'Ok, you will receive a login link by email shortly.'
+                        data['success'] = 'Ok, if we have your data you will receive a login link by email shortly.'
                         return data
             
             if password:
