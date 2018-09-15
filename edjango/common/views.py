@@ -298,12 +298,10 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
             
             # Check both email and password are set
             if not email:
-                data['error'] = 'Missing email'
-                return(render(request, 'error.html', {'data': data}))
+                raise ErrorMessage('Missing email')
          
             if not password:
-                data['error'] = 'Missing password'
-                return(render(request, 'error.html', {'data': data}))
+                raise ErrorMessage('Missing password')
          
             # Check if we have to validate an invitation code
             if invitation_code:
@@ -340,7 +338,7 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
                 # Remove user from recent signups
                 del ONGOING_SIGNUPS[email]
                 
-                return(render(request, 'register.html', {'data': data}))
+                return data
             
             else:
 
@@ -353,25 +351,22 @@ def register_view_template(request, redirect, invitation_code=None, callback=Non
                         time.sleep(1)
                         i+=1
                     if i>30:
-                        data['error'] = 'Timed up. Your user might have been correctly created anyway. Please try to login if it does not work to signup again, if the error persists contact us at info@symplitica.com'
-                        return(render(request, 'error.html', {'data': data}))
+                        raise ErrorMessage('Timed up. Your user might have been correctly created anyway. Please try to login if it does not work to signup again, if the error persists contact us')
 
                 users_with_this_email = User.objects.filter(email = email)
                 if users_with_this_email<1:
-                    data['error'] = 'Error in creating the user. Please try again and if the error persists contact us at info@symplitica.com'
-                    return(render(request, 'error.html', {'data': data}))
+                    raise ErrorMessage('Error in creating the user. Please try again and if the error persists contact us')
                 else:
                     data['status'] = 'activated'
                     data['user'] = users_with_this_email[0]
                     user = authenticate(username=users_with_this_email[0].username, password=password)
                     if not user:
-                        data['error'] = 'Error. Please try again and if the error persists contact us at info@symplitica.com'
-                        return(render(request, 'error.html', {'data': data}))
+                        raise ErrorMessage('Error. Please try again and if the error persists contact us')
                     login(request, user)
-                    return(render(request, 'register.html', {'data': data}))   
+                    return data 
 
         else:
-            return(render(request, 'register.html', {'data': data}))
+            return data
 
 
 
