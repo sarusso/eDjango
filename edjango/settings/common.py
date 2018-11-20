@@ -7,6 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from edjango.common.utils import discover_apps
 from edjango.common.utils import booleanize
 
+
 #===============================
 #  Base settings
 #===============================
@@ -18,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#k%566hw@w%1((_&=640_4w#p)piwt$m4%#(9x^+it5(h1b6zy'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#k%566hw@w%1((_&=640_4w#p)piwt$m4%#(9x^+it5(h1b6zy')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = booleanize(os.environ.get('DJANGO_DEBUG', False))
@@ -118,6 +119,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
 
 #===============================
 #  Project settings
