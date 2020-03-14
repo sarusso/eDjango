@@ -104,7 +104,10 @@ def username_hash(email):
 
 def random_username():
     '''Create a random string of 156 chars to be used as username'''             
-    username = ''.join(random.choice('abcdefghilmnopqrtuvz') for _ in range(16))
+    #username = ''.join(random.choice('abcdefghilmnopqrtuvz') for _ in range(16))
+    #import uuid
+    #username = str(uuid4()).replace('-','')[0:16] # or [0:22]
+    username = ''.join(random.choice('qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789') for _ in range(22))
     return username
 
 
